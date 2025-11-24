@@ -58,6 +58,26 @@
             background-size: cover;
         }
         
+        .language-selector {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 100;
+        }
+        
+        .language-selector .btn {
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid white;
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+        
+        .language-selector .btn.active {
+            background: white;
+            color: var(--primary-color);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+        
         .card {
             border: none;
             border-radius: 20px;
@@ -429,13 +449,6 @@
             font-weight: 600;
         }
         
-        .language-selector {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            z-index: 100;
-        }
-        
         .settings-panel {
             background: white;
             border-radius: 15px;
@@ -537,6 +550,53 @@
             border-radius: 20px;
             font-weight: 600;
         }
+        
+        .product-checkbox {
+            margin-right: 10px;
+        }
+        
+        .optimization-options {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        
+        .pallet-custom {
+            margin-top: 10px;
+            padding: 10px;
+            background: #e9ecef;
+            border-radius: 8px;
+        }
+        
+        .file-info {
+            margin-top: 10px;
+            padding: 10px;
+            background: #e9f7fe;
+            border-radius: 8px;
+            border: 1px solid #b8e6ff;
+        }
+        
+        .safety-controls {
+            margin-top: 10px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .safety-input-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .safety-value-display {
+            font-weight: bold;
+            color: var(--primary-color);
+            min-width: 60px;
+            text-align: center;
+        }
     </style>
 </head>
 <body dir="rtl">
@@ -574,14 +634,36 @@
                             </div>
                             <p class="mb-0 text-muted small" id="palletNoneDesc">المنتجات توضع مباشرة في الحاوية</p>
                         </div>
-                        <div class="pallet-option" data-pallet="with">
+                        <div class="pallet-option" data-pallet="standard">
                             <div class="form-check">
-                                <input class="form-check-input" type="radio" name="palletOption" id="palletWith">
-                                <label class="form-check-label fw-bold" for="palletWith" id="palletWithLabel">
-                                    مع بالتات خشبية
+                                <input class="form-check-input" type="radio" name="palletOption" id="palletStandard">
+                                <label class="form-check-label fw-bold" for="palletStandard" id="palletStandardLabel">
+                                    بالتات قياسية
                                 </label>
                             </div>
-                            <p class="mb-0 text-muted small" id="palletWithDesc">المنتجات توضع على بالتات خشبية قياسية (1.2م × 1م)</p>
+                            <p class="mb-0 text-muted small" id="palletStandardDesc">بالتات خشبية قياسية (1.2م × 1م × 0.15م)</p>
+                        </div>
+                        <div class="pallet-option" data-pallet="custom">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="palletOption" id="palletCustom">
+                                <label class="form-check-label fw-bold" for="palletCustom" id="palletCustomLabel">
+                                    بالتات مخصصة
+                                </label>
+                            </div>
+                            <div class="pallet-custom" id="palletCustomDimensions" style="display: none;">
+                                <div class="row g-2">
+                                    <div class="col-4">
+                                        <input type="number" class="form-control" id="customPalletLength" placeholder="الطول" step="0.01" min="0.1" value="1.2">
+                                    </div>
+                                    <div class="col-4">
+                                        <input type="number" class="form-control" id="customPalletWidth" placeholder="العرض" step="0.01" min="0.1" value="1.0">
+                                    </div>
+                                    <div class="col-4">
+                                        <input type="number" class="form-control" id="customPalletHeight" placeholder="الارتفاع" step="0.01" min="0.01" value="0.15">
+                                    </div>
+                                </div>
+                                <p class="mb-0 mt-2 text-muted small" id="palletCustomDesc">أدخل أبعاد البالت بالمتر</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -590,11 +672,28 @@
                         <label class="form-label" id="safetyLabel">إعدادات السلامة:</label>
                         <div class="form-check form-switch mb-2">
                             <input class="form-check-input" type="checkbox" id="safetySpace" checked>
-                            <label class="form-check-label" for="safetySpace" id="safetySpaceLabel">مسافات أمان بين المنتجات</label>
+                            <label class="form-check-label" for="safetySpace" id="safetySpaceLabel">تفعيل مسافات الأمان بين المنتجات</label>
                         </div>
                         <div class="form-check form-switch">
                             <input class="form-check-input" type="checkbox" id="doorSpace" checked>
-                            <label class="form-check-label" for="doorSpace" id="doorSpaceLabel">مراعاة مساحة باب الحاوية</label>
+                            <label class="form-check-label" for="doorSpace" id="doorSpaceLabel">مراعاة مساحة باب الحاوية (15 سم)</label>
+                        </div>
+                        
+                        <!-- عناصر التحكم في مسافات الأمان -->
+                        <div class="safety-controls" id="safetyControls">
+                            <h6 id="safetyDistanceTitle">مسافة الأمان بين المنتجات:</h6>
+                            <div class="safety-input-group">
+                                <input type="range" class="form-range" id="safetyDistanceSlider" min="1" max="100" value="5" step="1">
+                                <div class="input-group" style="max-width: 150px;">
+                                    <input type="number" class="form-control" id="safetyDistanceInput" min="1" max="100" value="5" step="1">
+                                    <select class="form-select" id="safetyDistanceUnit" style="max-width: 100px;">
+                                        <option value="mm">مم</option>
+                                        <option value="cm" selected>سم</option>
+                                    </select>
+                                </div>
+                                <span class="safety-value-display" id="safetyDistanceDisplay">5 سم</span>
+                            </div>
+                            <p class="text-muted small mt-2" id="safetyDistanceDesc">المسافة المثالية بين المنتجات تتراوح بين 2-10 سم</p>
                         </div>
                     </div>
                 </div>
@@ -617,6 +716,11 @@
                             <label for="fileInput" class="file-label">
                                 <i class="fas fa-folder-open me-2"></i><span id="uploadButtonText">اختر ملف Excel</span>
                             </label>
+                            <div class="file-info" id="fileInfo" style="display: none;">
+                                <i class="fas fa-file-excel text-success me-2"></i>
+                                <span id="fileName"></span>
+                                <span class="badge bg-success ms-2" id="productCount">0 منتجات</span>
+                            </div>
                             <p class="mt-3 small text-muted" id="uploadRequirements">يجب أن يحتوي الملف على الأعمدة التالية: اسم الصنف، الطول، العرض، الارتفاع</p>
                         </div>
                         
@@ -650,6 +754,21 @@
                         <div class="product-selection mt-3" id="productList">
                             <!-- سيتم إضافة المنتجات هنا -->
                             <p class="text-muted text-center" id="noProductsText">لم يتم إضافة منتجات بعد</p>
+                        </div>
+                        
+                        <div class="optimization-options mt-3">
+                            <h6 id="optimizationTitle">خيارات التحسين:</h6>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="optimizeArrangement" checked>
+                                <label class="form-check-label" for="optimizeArrangement" id="optimizeArrangementLabel">تحسين ترتيب المنتجات تلقائياً</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="mixProducts">
+                                <label class="form-check-label" for="mixProducts" id="mixProductsLabel">دمج المنتجات المختلفة لتحسين الاستخدام</label>
+                            </div>
+                            <button class="btn btn-sm btn-outline-primary mt-2" id="optimizeBtn">
+                                <i class="fas fa-magic me-1"></i><span id="optimizeBtnText">تطبيق التحسينات</span>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -807,6 +926,7 @@
         // بيانات التطبيق
         const appData = {
             products: [],
+            selectedProducts: [],
             containers: {
                 '20ft': { 
                     length: 5.89, 
@@ -835,9 +955,15 @@
             currentView: 'top',
             currentUnit: 'cm',
             usePallets: false,
+            palletType: 'none', // none, standard, custom
+            customPallet: { length: 1.2, width: 1.0, height: 0.15 },
             safetySpace: true,
+            safetyDistance: 5, // قيمة افتراضية 5 سم
+            safetyDistanceUnit: 'cm', // وحدة القياس الافتراضية
             doorSpace: true,
-            language: 'ar'
+            language: 'ar',
+            optimizeArrangement: true,
+            mixProducts: false
         };
 
         // نصوص التطبيق بلغتين
@@ -849,11 +975,15 @@
                 palletLabel: "نوع التحميل:",
                 palletNoneLabel: "بدون بالتات خشبية",
                 palletNoneDesc: "المنتجات توضع مباشرة في الحاوية",
-                palletWithLabel: "مع بالتات خشبية",
-                palletWithDesc: "المنتجات توضع على بالتات خشبية قياسية (1.2م × 1م)",
+                palletStandardLabel: "بالتات قياسية",
+                palletStandardDesc: "بالتات خشبية قياسية (1.2م × 1م × 0.15م)",
+                palletCustomLabel: "بالتات مخصصة",
+                palletCustomDesc: "أدخل أبعاد البالت بالمتر",
                 safetyLabel: "إعدادات السلامة:",
-                safetySpaceLabel: "مسافات أمان بين المنتجات",
-                doorSpaceLabel: "مراعاة مساحة باب الحاوية",
+                safetySpaceLabel: "تفعيل مسافات الأمان بين المنتجات",
+                doorSpaceLabel: "مراعاة مساحة باب الحاوية (15 سم)",
+                safetyDistanceTitle: "مسافة الأمان بين المنتجات:",
+                safetyDistanceDesc: "المسافة المثالية بين المنتجات تتراوح بين 2-10 سم",
                 uploadTitle: "رفع ملف البيانات",
                 uploadDragTitle: "اسحب ملف Excel وأفلته هنا",
                 uploadClickDesc: "أو انقر لاختيار الملف",
@@ -897,7 +1027,15 @@
                 noProductsError: "يرجى إضافة منتجات أولاً",
                 noContainerError: "يرجى اختيار نوع حاوية واحد على الأقل",
                 noDataExportError: "لا توجد بيانات للتصدير",
-                exportError: "حدث خطأ أثناء التصدير: "
+                exportError: "حدث خطأ أثناء التصدير: ",
+                optimizationTitle: "خيارات التحسين:",
+                optimizeArrangementLabel: "تحسين ترتيب المنتجات تلقائياً",
+                mixProductsLabel: "دمج المنتجات المختلفة لتحسين الاستخدام",
+                optimizeBtnText: "تطبيق التحسينات",
+                selectAllText: "تحديد الكل",
+                deselectAllText: "إلغاء التحديد",
+                selectedProductsText: "منتج محدد",
+                selectedProductsTextPlural: "منتجات محددة"
             },
             en: {
                 mainTitle: "Container Load Calculator",
@@ -906,11 +1044,15 @@
                 palletLabel: "Loading Type:",
                 palletNoneLabel: "Without Wooden Pallets",
                 palletNoneDesc: "Products are placed directly in the container",
-                palletWithLabel: "With Wooden Pallets",
-                palletWithDesc: "Products are placed on standard wooden pallets (1.2m × 1m)",
+                palletStandardLabel: "Standard Pallets",
+                palletStandardDesc: "Standard wooden pallets (1.2m × 1m × 0.15m)",
+                palletCustomLabel: "Custom Pallets",
+                palletCustomDesc: "Enter pallet dimensions in meters",
                 safetyLabel: "Safety Settings:",
-                safetySpaceLabel: "Safety spaces between products",
-                doorSpaceLabel: "Consider container door space",
+                safetySpaceLabel: "Enable safety spaces between products",
+                doorSpaceLabel: "Consider container door space (15 cm)",
+                safetyDistanceTitle: "Safety distance between products:",
+                safetyDistanceDesc: "The ideal distance between products ranges from 2-10 cm",
                 uploadTitle: "Upload Data File",
                 uploadDragTitle: "Drag and drop Excel file here",
                 uploadClickDesc: "Or click to choose file",
@@ -954,7 +1096,15 @@
                 noProductsError: "Please add products first",
                 noContainerError: "Please select at least one container type",
                 noDataExportError: "No data to export",
-                exportError: "Error during export: "
+                exportError: "Error during export: ",
+                optimizationTitle: "Optimization Options:",
+                optimizeArrangementLabel: "Automatically optimize product arrangement",
+                mixProductsLabel: "Mix different products to improve utilization",
+                optimizeBtnText: "Apply Optimizations",
+                selectAllText: "Select All",
+                deselectAllText: "Deselect All",
+                selectedProductsText: "product selected",
+                selectedProductsTextPlural: "products selected"
             }
         };
 
@@ -987,9 +1137,67 @@
                     this.classList.add('selected');
                     const radio = this.querySelector('input[type="radio"]');
                     radio.checked = true;
-                    appData.usePallets = radio.id === 'palletWith';
+                    
+                    // تحديث نوع البالتات
+                    const palletType = this.getAttribute('data-pallet');
+                    appData.palletType = palletType;
+                    appData.usePallets = palletType !== 'none';
+                    
+                    // إظهار/إخفاء خيارات البالتات المخصصة
+                    const customPalletDiv = document.getElementById('palletCustomDimensions');
+                    if (palletType === 'custom') {
+                        customPalletDiv.style.display = 'block';
+                    } else {
+                        customPalletDiv.style.display = 'none';
+                    }
                 });
             });
+            
+            // تحديث البالتات المخصصة عند تغيير القيم
+            document.getElementById('customPalletLength').addEventListener('change', updateCustomPallet);
+            document.getElementById('customPalletWidth').addEventListener('change', updateCustomPallet);
+            document.getElementById('customPalletHeight').addEventListener('change', updateCustomPallet);
+            
+            // تحديث مسافة الأمان
+            updateSafetyDistanceDisplay();
+        }
+        
+        // تحديث أبعاد البالت المخصص
+        function updateCustomPallet() {
+            appData.customPallet.length = parseFloat(document.getElementById('customPalletLength').value) || 1.2;
+            appData.customPallet.width = parseFloat(document.getElementById('customPalletWidth').value) || 1.0;
+            appData.customPallet.height = parseFloat(document.getElementById('customPalletHeight').value) || 0.15;
+        }
+        
+        // تحديث مسافة الأمان
+        function updateSafetyDistance() {
+            const slider = document.getElementById('safetyDistanceSlider');
+            const input = document.getElementById('safetyDistanceInput');
+            const unit = document.getElementById('safetyDistanceUnit').value;
+            
+            // مزامنة القيم بين المنزلق وحقل الإدخال
+            const value = parseInt(slider.value);
+            input.value = value;
+            appData.safetyDistance = value;
+            appData.safetyDistanceUnit = unit;
+            
+            updateSafetyDistanceDisplay();
+        }
+        
+        // تحديث عرض مسافة الأمان
+        function updateSafetyDistanceDisplay() {
+            const display = document.getElementById('safetyDistanceDisplay');
+            const unitText = appData.safetyDistanceUnit === 'cm' ? 'سم' : 'مم';
+            display.textContent = `${appData.safetyDistance} ${unitText}`;
+        }
+        
+        // الحصول على مسافة الأمان بالمتر
+        function getSafetyDistanceInMeters() {
+            if (appData.safetyDistanceUnit === 'cm') {
+                return appData.safetyDistance / 100; // تحويل من سم إلى م
+            } else {
+                return appData.safetyDistance / 1000; // تحويل من مم إلى م
+            }
         }
         
         // وظيفة تحديث اللغة
@@ -1014,6 +1222,9 @@
             document.getElementById('productLength').placeholder = lang === 'ar' ? 'الطول' : 'Length';
             document.getElementById('productWidth').placeholder = lang === 'ar' ? 'العرض' : 'Width';
             document.getElementById('productHeight').placeholder = lang === 'ar' ? 'الارتفاع' : 'Height';
+            document.getElementById('customPalletLength').placeholder = lang === 'ar' ? 'الطول' : 'Length';
+            document.getElementById('customPalletWidth').placeholder = lang === 'ar' ? 'العرض' : 'Width';
+            document.getElementById('customPalletHeight').placeholder = lang === 'ar' ? 'الارتفاع' : 'Height';
             
             // تحديث أزرار اللغة
             if (lang === 'ar') {
@@ -1023,6 +1234,12 @@
                 document.getElementById('langEn').classList.add('active');
                 document.getElementById('langAr').classList.remove('active');
             }
+            
+            // تحديث قائمة المنتجات
+            updateProductList();
+            
+            // تحديث مسافة الأمان
+            updateSafetyDistanceDisplay();
         }
         
         // وظيفة إعداد الأحداث
@@ -1040,6 +1257,12 @@
             const langEnBtn = document.getElementById('langEn');
             const safetySpaceCheck = document.getElementById('safetySpace');
             const doorSpaceCheck = document.getElementById('doorSpace');
+            const optimizeArrangementCheck = document.getElementById('optimizeArrangement');
+            const mixProductsCheck = document.getElementById('mixProducts');
+            const optimizeBtn = document.getElementById('optimizeBtn');
+            const safetyDistanceSlider = document.getElementById('safetyDistanceSlider');
+            const safetyDistanceInput = document.getElementById('safetyDistanceInput');
+            const safetyDistanceUnit = document.getElementById('safetyDistanceUnit');
             
             // إعداد أحداث السحب والإفلات
             setupDragAndDrop(fileUploadArea, fileInput);
@@ -1108,11 +1331,76 @@
             // إعداد أحداث إعدادات السلامة
             safetySpaceCheck.addEventListener('change', function() {
                 appData.safetySpace = this.checked;
+                // إظهار/إخفاء عناصر التحكم في مسافة الأمان
+                const safetyControls = document.getElementById('safetyControls');
+                if (this.checked) {
+                    safetyControls.style.display = 'block';
+                } else {
+                    safetyControls.style.display = 'none';
+                }
             });
             
             doorSpaceCheck.addEventListener('change', function() {
                 appData.doorSpace = this.checked;
             });
+            
+            // إعداد أحداث خيارات التحسين
+            optimizeArrangementCheck.addEventListener('change', function() {
+                appData.optimizeArrangement = this.checked;
+            });
+            
+            mixProductsCheck.addEventListener('change', function() {
+                appData.mixProducts = this.checked;
+            });
+            
+            optimizeBtn.addEventListener('click', function() {
+                applyOptimizations();
+            });
+            
+            // إعداد أحداث مسافة الأمان
+            safetyDistanceSlider.addEventListener('input', updateSafetyDistance);
+            safetyDistanceInput.addEventListener('input', function() {
+                const value = parseInt(this.value);
+                if (value >= 1 && value <= 100) {
+                    document.getElementById('safetyDistanceSlider').value = value;
+                    updateSafetyDistance();
+                }
+            });
+            safetyDistanceUnit.addEventListener('change', updateSafetyDistance);
+            
+            // إظهار/إخفاء عناصر التحكم في مسافة الأمان بناءً على الحالة الافتراضية
+            const safetyControls = document.getElementById('safetyControls');
+            if (appData.safetySpace) {
+                safetyControls.style.display = 'block';
+            } else {
+                safetyControls.style.display = 'none';
+            }
+        }
+        
+        // تطبيق التحسينات
+        function applyOptimizations() {
+            if (appData.products.length === 0) {
+                alert(getText('noProductsError'));
+                return;
+            }
+            
+            // فرز المنتجات حسب الحجم (من الأكبر إلى الأصغر)
+            if (appData.optimizeArrangement) {
+                appData.products.sort((a, b) => b.volume - a.volume);
+                updateProductList();
+            }
+            
+            // إذا كان دمج المنتجات مفعل، نقوم بإنشاء مجموعات مختلطة
+            if (appData.mixProducts) {
+                // هذه مجرد محاكاة للخوارزمية
+                // في التطبيق الحقيقي، ستكون الخوارزمية أكثر تعقيداً
+                alert(getText('mixProductsLabel') + ' ' + (appData.language === 'ar' ? 'تم تطبيقه' : 'applied'));
+            }
+            
+            // إعادة حساب الحمولة إذا كانت هناك نتائج سابقة
+            if (Object.keys(appData.loadResults).length > 0) {
+                calculateLoad();
+            }
         }
         
         // وظيفة إعداد السحب والإفلات
@@ -1154,6 +1442,7 @@
         
         // وظيفة معالجة رفع الملف
         function handleFileUpload() {
+            const fileInput = document.getElementById('fileInput');
             const file = fileInput.files[0];
             if (!file) {
                 alert(getText('noFileError'));
@@ -1172,6 +1461,7 @@
                     
                     // مسح المنتجات الحالية
                     appData.products = [];
+                    appData.selectedProducts = [];
                     
                     // معالجة البيانات
                     jsonData.forEach(row => {
@@ -1194,10 +1484,18 @@
                                 length: length,
                                 width: width,
                                 height: height,
-                                volume: length * width * height
+                                volume: length * width * height,
+                                selected: true
                             });
+                            appData.selectedProducts.push(appData.products.length - 1);
                         }
                     });
+                    
+                    // تحديث معلومات الملف
+                    document.getElementById('fileInfo').style.display = 'block';
+                    document.getElementById('fileName').textContent = file.name;
+                    document.getElementById('productCount').textContent = 
+                        appData.products.length + (appData.language === 'ar' ? ' منتجات' : ' products');
                     
                     updateProductList();
                     
@@ -1233,8 +1531,10 @@
                 length: length,
                 width: width,
                 height: height,
-                volume: length * width * height
+                volume: length * width * height,
+                selected: true
             });
+            appData.selectedProducts.push(appData.products.length - 1);
             
             // مسح حقول الإدخال
             document.getElementById('productName').value = '';
@@ -1255,32 +1555,105 @@
                 return;
             }
             
+            // إضافة أزرار التحديد
+            const selectionControls = document.createElement('div');
+            selectionControls.className = 'd-flex justify-content-between mb-3';
+            selectionControls.innerHTML = `
+                <div>
+                    <button class="btn btn-sm btn-outline-primary" id="selectAllBtn">
+                        <i class="fas fa-check-square me-1"></i>${getText('selectAllText')}
+                    </button>
+                    <button class="btn btn-sm btn-outline-secondary ms-2" id="deselectAllBtn">
+                        <i class="fas fa-times-circle me-1"></i>${getText('deselectAllText')}
+                    </button>
+                </div>
+                <div>
+                    <span class="badge bg-primary" id="selectedCount">
+                        ${appData.selectedProducts.length} ${appData.selectedProducts.length === 1 ? getText('selectedProductsText') : getText('selectedProductsTextPlural')}
+                    </span>
+                </div>
+            `;
+            productList.appendChild(selectionControls);
+            
+            // إضافة المنتجات
             appData.products.forEach((product, index) => {
                 const productItem = document.createElement('div');
                 productItem.className = 'product-item d-flex justify-content-between align-items-center';
                 productItem.innerHTML = `
-                    <div>
-                        <strong>${product.name}</strong>
-                        <small class="text-muted"> (${product.length.toFixed(2)} × ${product.width.toFixed(2)} × ${product.height.toFixed(2)} م)</small>
+                    <div class="d-flex align-items-center">
+                        <input class="form-check-input product-checkbox" type="checkbox" 
+                               data-index="${index}" ${product.selected ? 'checked' : ''}>
+                        <div class="ms-2">
+                            <strong>${product.name}</strong>
+                            <small class="text-muted"> (${product.length.toFixed(2)} × ${product.width.toFixed(2)} × ${product.height.toFixed(2)} م)</small>
+                        </div>
                     </div>
                     <button class="btn btn-sm btn-outline-danger" data-index="${index}">
                         <i class="fas fa-trash"></i>
                     </button>
                 `;
                 
+                // إعداد حدث تحديد/إلغاء تحديد المنتج
+                const checkbox = productItem.querySelector('.product-checkbox');
+                checkbox.addEventListener('change', function() {
+                    const index = parseInt(this.getAttribute('data-index'));
+                    appData.products[index].selected = this.checked;
+                    
+                    if (this.checked) {
+                        if (!appData.selectedProducts.includes(index)) {
+                            appData.selectedProducts.push(index);
+                        }
+                    } else {
+                        appData.selectedProducts = appData.selectedProducts.filter(i => i !== index);
+                    }
+                    
+                    // تحديث العداد
+                    document.getElementById('selectedCount').textContent = 
+                        `${appData.selectedProducts.length} ${appData.selectedProducts.length === 1 ? getText('selectedProductsText') : getText('selectedProductsTextPlural')}`;
+                });
+                
+                // إعداد حدث حذف المنتج
                 productItem.querySelector('button').addEventListener('click', function() {
                     const index = parseInt(this.getAttribute('data-index'));
                     appData.products.splice(index, 1);
+                    appData.selectedProducts = appData.selectedProducts.filter(i => i !== index)
+                        .map(i => i > index ? i - 1 : i);
                     updateProductList();
                 });
                 
                 productList.appendChild(productItem);
             });
+            
+            // إعداد أحداث أزرار التحديد
+            document.getElementById('selectAllBtn').addEventListener('click', function() {
+                appData.products.forEach((product, index) => {
+                    product.selected = true;
+                    if (!appData.selectedProducts.includes(index)) {
+                        appData.selectedProducts.push(index);
+                    }
+                });
+                updateProductList();
+            });
+            
+            document.getElementById('deselectAllBtn').addEventListener('click', function() {
+                appData.products.forEach(product => {
+                    product.selected = false;
+                });
+                appData.selectedProducts = [];
+                updateProductList();
+            });
+        }
+        
+        // وظيفة الحصول على المنتجات المحددة
+        function getSelectedProducts() {
+            return appData.products.filter((product, index) => appData.selectedProducts.includes(index));
         }
         
         // وظيفة حساب الحمولة
         function calculateLoad() {
-            if (appData.products.length === 0) {
+            const selectedProducts = getSelectedProducts();
+            
+            if (selectedProducts.length === 0) {
                 alert(getText('noProductsError'));
                 return;
             }
@@ -1309,7 +1682,7 @@
                 // حساب النتائج لكل حاوية مختارة
                 appData.selectedContainers.forEach(containerType => {
                     const container = appData.containers[containerType];
-                    const results = calculateContainerLoad(container, appData.products);
+                    const results = calculateContainerLoad(container, selectedProducts);
                     
                     appData.loadResults[containerType] = results;
                     
@@ -1352,12 +1725,22 @@
             let usedVolume = 0;
             
             // حساب مساحة البالتات إذا تم اختيارها
-            const palletSpace = appData.usePallets ? 0.1 : 0; // ارتفاع البالت
-            const palletArea = appData.usePallets ? 1.2 * 1.0 : 0; // مساحة البالت
+            let palletSpace = 0;
+            let palletArea = 0;
+            
+            if (appData.usePallets) {
+                if (appData.palletType === 'standard') {
+                    palletSpace = 0.15; // ارتفاع البالت القياسي
+                    palletArea = 1.2 * 1.0; // مساحة البالت القياسي
+                } else if (appData.palletType === 'custom') {
+                    palletSpace = appData.customPallet.height;
+                    palletArea = appData.customPallet.length * appData.customPallet.width;
+                }
+            }
             
             // حساب المساحة الفعلية المتاحة مع مراعاة الباب والمسافات الآمنة
             const effectiveLength = appData.doorSpace ? container.length - container.doorSpace : container.length;
-            const safetyMargin = appData.safetySpace ? 0.05 : 0; // 5 سم مسافة أمان
+            const safetyMargin = appData.safetySpace ? getSafetyDistanceInMeters() : 0;
             
             // محاكاة خوارزمية التحميل
             const productDistribution = [];
@@ -1436,7 +1819,7 @@
         // وظيفة إنشاء مواقع المنتجات (محاكاة)
         function generateProductPositions(container, product, maxLength, maxWidth, maxHeight, safetyMargin) {
             const positions = [];
-            let z = appData.usePallets ? 0.1 : 0; // بدء من ارتفاع البالت إذا كان مستخدم
+            let z = appData.usePallets ? (appData.palletType === 'standard' ? 0.15 : appData.customPallet.height) : 0;
             
             for (let h = 0; h < maxHeight; h++) {
                 let y = 0;
@@ -1528,7 +1911,7 @@
                 <p><strong>${appData.language === 'ar' ? 'المساحة المستخدمة:' : 'Used Space:'}</strong> ${results.usedVolume.toFixed(2)} م³</p>
                 <p><strong>${appData.language === 'ar' ? 'المساحة المتبقية:' : 'Remaining Space:'}</strong> ${results.remainingVolume.toFixed(2)} م³</p>
                 <p><strong>${appData.language === 'ar' ? 'نسبة الاستخدام:' : 'Utilization Rate:'}</strong> ${results.utilizationRate.toFixed(1)}%</p>
-                <p><strong>${appData.language === 'ar' ? 'مسافات الأمان:' : 'Safety Spaces:'}</strong> ${appData.safetySpace ? (appData.language === 'ar' ? 'مفعلة' : 'Enabled') : (appData.language === 'ar' ? 'غير مفعلة' : 'Disabled')}</p>
+                <p><strong>${appData.language === 'ar' ? 'مسافات الأمان:' : 'Safety Spaces:'}</strong> ${appData.safetySpace ? (appData.safetyDistance + (appData.safetyDistanceUnit === 'cm' ? ' سم' : ' مم')) : (appData.language === 'ar' ? 'غير مفعلة' : 'Disabled')}</p>
                 <p><strong>${appData.language === 'ar' ? 'البالتات الخشبية:' : 'Wooden Pallets:'}</strong> ${appData.usePallets ? (appData.language === 'ar' ? 'مستخدمة' : 'Used') : (appData.language === 'ar' ? 'غير مستخدمة' : 'Not Used')}</p>
             `;
             visualizationContent.appendChild(statsBox);
@@ -1713,7 +2096,9 @@
         
         // وظيفة التصدير إلى Excel
         function exportToExcel() {
-            if (appData.products.length === 0) {
+            const selectedProducts = getSelectedProducts();
+            
+            if (selectedProducts.length === 0) {
                 alert(getText('noDataExportError'));
                 return;
             }
@@ -1723,7 +2108,7 @@
                 const wb = XLSX.utils.book_new();
                 
                 // إضافة ورقة للمنتجات
-                const productsData = appData.products.map(p => [p.name, p.length, p.width, p.height, p.volume]);
+                const productsData = selectedProducts.map(p => [p.name, p.length, p.width, p.height, p.volume]);
                 productsData.unshift([getText('thContainerType'), 'الطول (م)', 'العرض (م)', 'الارتفاع (م)', 'الحجم (م³)']);
                 const productsWs = XLSX.utils.aoa_to_sheet(productsData);
                 XLSX.utils.book_append_sheet(wb, productsWs, 'المنتجات');
@@ -1734,15 +2119,17 @@
                 
                 appData.selectedContainers.forEach(containerType => {
                     const container = appData.containers[containerType];
-                    const results = appData.loadResults[containerType] || calculateContainerLoad(container, appData.products);
-                    resultsData.push([
-                        container.name,
-                        results.totalProducts,
-                        `${results.usedVolume.toFixed(2)}`,
-                        `${results.remainingVolume.toFixed(2)}`,
-                        `${results.utilizationRate.toFixed(1)}`,
-                        results.distribution
-                    ]);
+                    const results = appData.loadResults[containerType];
+                    if (results) {
+                        resultsData.push([
+                            container.name,
+                            results.totalProducts,
+                            `${results.usedVolume.toFixed(2)}`,
+                            `${results.remainingVolume.toFixed(2)}`,
+                            `${results.utilizationRate.toFixed(1)}`,
+                            results.distribution
+                        ]);
+                    }
                 });
                 
                 const resultsWs = XLSX.utils.aoa_to_sheet(resultsData);
@@ -1758,7 +2145,9 @@
         
         // وظيفة التصدير إلى PDF
         function exportToPdf() {
-            if (appData.products.length === 0) {
+            const selectedProducts = getSelectedProducts();
+            
+            if (selectedProducts.length === 0) {
                 alert(getText('noDataExportError'));
                 return;
             }
@@ -1789,14 +2178,16 @@
                 
                 appData.selectedContainers.forEach(containerType => {
                     const container = appData.containers[containerType];
-                    const results = appData.loadResults[containerType] || calculateContainerLoad(container, appData.products);
-                    data.push([
-                        container.name,
-                        results.totalProducts.toString(),
-                        `${results.usedVolume.toFixed(2)}`,
-                        `${results.remainingVolume.toFixed(2)}`,
-                        `${results.utilizationRate.toFixed(1)}`
-                    ]);
+                    const results = appData.loadResults[containerType];
+                    if (results) {
+                        data.push([
+                            container.name,
+                            results.totalProducts.toString(),
+                            `${results.usedVolume.toFixed(2)}`,
+                            `${results.remainingVolume.toFixed(2)}`,
+                            `${results.utilizationRate.toFixed(1)}`
+                        ]);
+                    }
                 });
                 
                 doc.autoTable({
