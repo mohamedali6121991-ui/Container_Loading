@@ -1,0 +1,1837 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Container Load Calculator - حاسبة حمولة الحاويات</title>
+    <!-- مكتبات CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3a0ca3;
+            --accent-color: #f72585;
+            --success-color: #4cc9f0;
+            --warning-color: #f8961e;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --container-color: #7209b7;
+            --product-color: #4895ef;
+        }
+        
+        [dir="rtl"] {
+            --font-family: 'Cairo', sans-serif;
+        }
+        
+        [dir="ltr"] {
+            --font-family: 'Poppins', sans-serif;
+        }
+        
+        body {
+            font-family: var(--font-family);
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: var(--dark-color);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 2.5rem 0;
+            border-radius: 0 0 30px 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M0,0 L100,0 L100,100 Z" fill="rgba(255,255,255,0.1)"/></svg>');
+            background-size: cover;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            margin-bottom: 25px;
+            overflow: hidden;
+            background: white;
+        }
+        
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
+        }
+        
+        .card-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border-radius: 20px 20px 0 0 !important;
+            font-weight: bold;
+            padding: 1.2rem 1.5rem;
+            font-size: 1.1rem;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border: none;
+            border-radius: 12px;
+            padding: 12px 25px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 20px rgba(67, 97, 238, 0.4);
+            background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #4cc9f0, #4895ef);
+            border: none;
+            border-radius: 12px;
+            padding: 12px 25px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(76, 201, 240, 0.3);
+        }
+        
+        .btn-success:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 20px rgba(76, 201, 240, 0.4);
+            background: linear-gradient(135deg, #4895ef, #4cc9f0);
+        }
+        
+        .container-type {
+            border: 2px solid #e9ecef;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+        
+        .container-type:hover {
+            border-color: var(--primary-color);
+            background-color: rgba(67, 97, 238, 0.05);
+            transform: translateY(-5px);
+        }
+        
+        .container-type.selected {
+            border-color: var(--primary-color);
+            background: linear-gradient(135deg, rgba(67, 97, 238, 0.1), rgba(58, 12, 163, 0.05));
+            box-shadow: 0 5px 15px rgba(67, 97, 238, 0.15);
+        }
+        
+        .product-item {
+            border-bottom: 1px solid #eee;
+            padding: 15px 0;
+            transition: all 0.3s ease;
+        }
+        
+        .product-item:hover {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding-left: 10px;
+            padding-right: 10px;
+        }
+        
+        .product-item:last-child {
+            border-bottom: none;
+        }
+        
+        .results-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .results-table th, .results-table td {
+            padding: 15px;
+            text-align: center;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .results-table th {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            font-weight: 600;
+        }
+        
+        .results-table tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        
+        .results-table tr:hover {
+            background-color: #e9ecef;
+        }
+        
+        .optimization-tip {
+            background: linear-gradient(135deg, #fff9e6, #fff0c2);
+            border-left: 5px solid var(--warning-color);
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .file-upload-area {
+            border: 3px dashed #b8b8b8;
+            border-radius: 20px;
+            padding: 40px 30px;
+            text-align: center;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+            position: relative;
+        }
+        
+        .file-upload-area:hover {
+            border-color: var(--primary-color);
+            background-color: rgba(67, 97, 238, 0.05);
+            transform: translateY(-5px);
+        }
+        
+        .file-upload-area.dragover {
+            border-color: var(--primary-color);
+            background: linear-gradient(135deg, rgba(67, 97, 238, 0.1), rgba(58, 12, 163, 0.05));
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .file-label {
+            cursor: pointer;
+            display: inline-block;
+            padding: 12px 30px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
+        }
+        
+        .file-label:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 20px rgba(67, 97, 238, 0.4);
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 25px;
+        }
+        
+        @media (max-width: 768px) {
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px 20px;
+        }
+        
+        .spinner {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--primary-color);
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .dimension-input {
+            max-width: 110px;
+            display: inline-block;
+        }
+        
+        .container-dimensions {
+            font-size: 0.95rem;
+            color: #6c757d;
+            margin-top: 8px;
+        }
+        
+        .product-selection {
+            max-height: 350px;
+            overflow-y: auto;
+            border: 1px solid #e9ecef;
+            border-radius: 15px;
+            padding: 20px;
+            background: white;
+        }
+        
+        /* أنماط المخططات */
+        .visualization-container {
+            margin-top: 35px;
+            border: 1px solid #e9ecef;
+            border-radius: 20px;
+            padding: 25px;
+            background: white;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+        }
+        
+        .visualization-tabs {
+            display: flex;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #e9ecef;
+        }
+        
+        .visualization-tab {
+            padding: 12px 25px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            border-bottom: none;
+            border-radius: 10px 10px 0 0;
+            margin-right: 5px;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+        
+        .visualization-tab.active {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border-color: #e9ecef;
+        }
+        
+        .visualization-content {
+            display: none;
+        }
+        
+        .visualization-content.active {
+            display: block;
+        }
+        
+        .container-diagram {
+            width: 100%;
+            height: 450px;
+            border: 2px solid #e0e0e0;
+            position: relative;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            margin-bottom: 25px;
+            overflow: hidden;
+            border-radius: 15px;
+        }
+        
+        .product-box {
+            position: absolute;
+            border: 1px solid rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: white;
+            text-align: center;
+            box-sizing: border-box;
+            overflow: hidden;
+            word-break: break-word;
+            font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-right: 20px;
+        }
+        
+        .legend-color {
+            width: 25px;
+            height: 25px;
+            margin-left: 8px;
+            border: 1px solid rgba(0, 0, 0, 0.3);
+            border-radius: 5px;
+        }
+        
+        .view-controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .view-btn {
+            padding: 8px 16px;
+            border: 2px solid #e0e0e0;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+        
+        .view-btn.active {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border-color: var(--primary-color);
+        }
+        
+        .stats-box {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border: 1px solid #dee2e6;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .stats-box h5 {
+            margin-top: 0;
+            color: var(--primary-color);
+            font-weight: 700;
+        }
+        
+        .unit-selector {
+            max-width: 140px;
+        }
+        
+        .dimension-input-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .dimension-label {
+            min-width: 70px;
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+        
+        .language-selector {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 100;
+        }
+        
+        .settings-panel {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+        
+        .settings-title {
+            color: var(--primary-color);
+            font-weight: 700;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 10px;
+        }
+        
+        .form-check-input:checked {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .pallet-option {
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .pallet-option:hover {
+            border-color: var(--primary-color);
+            background-color: rgba(67, 97, 238, 0.05);
+        }
+        
+        .pallet-option.selected {
+            border-color: var(--primary-color);
+            background: linear-gradient(135deg, rgba(67, 97, 238, 0.1), rgba(58, 12, 163, 0.05));
+        }
+        
+        .empty-space {
+            background: repeating-linear-gradient(45deg, #f8f9fa, #f8f9fa 10px, #e9ecef 10px, #e9ecef 20px);
+            border: 1px dashed #adb5bd;
+        }
+        
+        .door-space {
+            background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+            border: 2px dashed #ff6b6b;
+        }
+        
+        .safety-space {
+            background: rgba(255, 193, 7, 0.2);
+            border: 1px dashed #ffc107;
+        }
+        
+        .container-door {
+            position: absolute;
+            background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+            border: 2px dashed #ff6b6b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #d00000;
+            font-weight: bold;
+            font-size: 12px;
+        }
+        
+        .floating-action {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 1000;
+        }
+        
+        .floating-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 5px 20px rgba(67, 97, 238, 0.4);
+            transition: all 0.3s ease;
+            border: none;
+            font-size: 24px;
+        }
+        
+        .floating-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 25px rgba(67, 97, 238, 0.5);
+        }
+        
+        .badge-custom {
+            background: linear-gradient(135deg, var(--accent-color), #b5179e);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body dir="rtl">
+    <!-- زر اختيار اللغة -->
+    <div class="language-selector">
+        <div class="btn-group">
+            <button class="btn btn-sm btn-outline-primary active" id="langAr">العربية</button>
+            <button class="btn btn-sm btn-outline-primary" id="langEn">English</button>
+        </div>
+    </div>
+
+    <!-- رأس الصفحة -->
+    <header class="header text-center mb-5">
+        <div class="container">
+            <h1 class="display-4 fw-bold" id="mainTitle">تطبيق حساب حمولة الحاويات</h1>
+            <p class="lead" id="mainSubtitle">احسب أفضل طريقة لتحميل منتجاتك في الحاويات بسهولة</p>
+        </div>
+    </header>
+
+    <!-- المحتوى الرئيسي -->
+    <div class="container">
+        <!-- إعدادات التحميل -->
+        <div class="settings-panel">
+            <h4 class="settings-title" id="settingsTitle">إعدادات التحميل</h4>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label class="form-label" id="palletLabel">نوع التحميل:</label>
+                        <div class="pallet-option selected" data-pallet="none">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="palletOption" id="palletNone" checked>
+                                <label class="form-check-label fw-bold" for="palletNone" id="palletNoneLabel">
+                                    بدون بالتات خشبية
+                                </label>
+                            </div>
+                            <p class="mb-0 text-muted small" id="palletNoneDesc">المنتجات توضع مباشرة في الحاوية</p>
+                        </div>
+                        <div class="pallet-option" data-pallet="with">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="palletOption" id="palletWith">
+                                <label class="form-check-label fw-bold" for="palletWith" id="palletWithLabel">
+                                    مع بالتات خشبية
+                                </label>
+                            </div>
+                            <p class="mb-0 text-muted small" id="palletWithDesc">المنتجات توضع على بالتات خشبية قياسية (1.2م × 1م)</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label class="form-label" id="safetyLabel">إعدادات السلامة:</label>
+                        <div class="form-check form-switch mb-2">
+                            <input class="form-check-input" type="checkbox" id="safetySpace" checked>
+                            <label class="form-check-label" for="safetySpace" id="safetySpaceLabel">مسافات أمان بين المنتجات</label>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="doorSpace" checked>
+                            <label class="form-check-label" for="doorSpace" id="doorSpaceLabel">مراعاة مساحة باب الحاوية</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <!-- لوحة رفع الملفات -->
+            <div class="col-lg-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-file-upload me-2"></i><span id="uploadTitle">رفع ملف البيانات</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="file-upload-area" id="fileUploadArea">
+                            <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
+                            <h5 id="uploadDragTitle">اسحب ملف Excel وأفلته هنا</h5>
+                            <p class="text-muted" id="uploadClickDesc">أو انقر لاختيار الملف</p>
+                            <input type="file" id="fileInput" class="file-input" accept=".xlsx, .xls">
+                            <label for="fileInput" class="file-label">
+                                <i class="fas fa-folder-open me-2"></i><span id="uploadButtonText">اختر ملف Excel</span>
+                            </label>
+                            <p class="mt-3 small text-muted" id="uploadRequirements">يجب أن يحتوي الملف على الأعمدة التالية: اسم الصنف، الطول، العرض، الارتفاع</p>
+                        </div>
+                        
+                        <div class="mt-4">
+                            <h6 id="manualEntryTitle">أو أدخل البيانات يدويًا:</h6>
+                            <div class="mb-3">
+                                <label class="form-label" id="unitLabel">وحدة القياس:</label>
+                                <select class="form-select unit-selector" id="unitSelector">
+                                    <option value="cm">سنتيمتر (cm)</option>
+                                    <option value="m">متر (m)</option>
+                                </select>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-4">
+                                    <input type="text" class="form-control" id="productName" placeholder="اسم الصنف">
+                                </div>
+                                <div class="col-md-8">
+                                    <div class="dimension-input-group">
+                                        <span class="dimension-label" id="lengthLabel">الطول:</span>
+                                        <input type="number" class="form-control dimension-input" id="productLength" placeholder="الطول" step="0.1" min="0.1">
+                                        <span class="dimension-label" id="widthLabel">العرض:</span>
+                                        <input type="number" class="form-control dimension-input" id="productWidth" placeholder="العرض" step="0.1" min="0.1">
+                                        <span class="dimension-label" id="heightLabel">الارتفاع:</span>
+                                        <input type="number" class="form-control dimension-input" id="productHeight" placeholder="الارتفاع" step="0.1" min="0.1">
+                                        <button class="btn btn-primary" id="addProductBtn"><i class="fas fa-plus me-1"></i><span id="addButtonText">إضافة</span></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="product-selection mt-3" id="productList">
+                            <!-- سيتم إضافة المنتجات هنا -->
+                            <p class="text-muted text-center" id="noProductsText">لم يتم إضافة منتجات بعد</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- لوحة اختيار الحاويات -->
+            <div class="col-lg-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-box me-2"></i><span id="containerTitle">اختيار نوع الحاوية</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="container-type" data-type="20ft">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="container20ft" value="20ft">
+                                <label class="form-check-label fw-bold" for="container20ft">
+                                    حاوية 20 قدم
+                                </label>
+                            </div>
+                            <p class="container-dimensions mb-0">الأبعاد الداخلية: 5.89م × 2.35م × 2.39م (الطول × العرض × الارتفاع)</p>
+                        </div>
+                        
+                        <div class="container-type" data-type="40ft">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="container40ft" value="40ft">
+                                <label class="form-check-label fw-bold" for="container40ft">
+                                    حاوية 40 قدم
+                                </label>
+                            </div>
+                            <p class="container-dimensions mb-0">الأبعاد الداخلية: 12.03م × 2.35م × 2.39م (الطول × العرض × الارتفاع)</p>
+                        </div>
+                        
+                        <div class="container-type" data-type="40ftHigh">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="container40ftHigh" value="40ftHigh">
+                                <label class="form-check-label fw-bold" for="container40ftHigh">
+                                    حاوية 40 قدم عالية
+                                </label>
+                            </div>
+                            <p class="container-dimensions mb-0">الأبعاد الداخلية: 12.03م × 2.35م × 2.69م (الطول × العرض × الارتفاع)</p>
+                        </div>
+                        
+                        <div class="mt-4">
+                            <button class="btn btn-success w-100" id="calculateBtn">
+                                <i class="fas fa-calculator me-2"></i><span id="calculateButtonText">حساب الحمولة</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- نصائح التحسين -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <i class="fas fa-lightbulb me-2"></i><span id="tipsTitle">نصائح لتحسين الحمولة</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="optimization-tip">
+                            <h6><i class="fas fa-info-circle me-2"></i><span id="tip1Title">ترتيب المنتجات</span></h6>
+                            <p class="mb-0" id="tip1Desc">رتب المنتجات بحيث توضع الصناديق الكبيرة أولاً ثم الأصغر لتقليل الفراغات.</p>
+                        </div>
+                        
+                        <div class="optimization-tip">
+                            <h6><i class="fas fa-info-circle me-2"></i><span id="tip2Title">استخدام الارتفاع</span></h6>
+                            <p class="mb-0" id="tip2Desc">استفد من الارتفاع الكامل للحاوية بترتيب المنتجات بشكل رأسي عندما يكون ذلك آمناً.</p>
+                        </div>
+                        
+                        <div class="optimization-tip">
+                            <h6><i class="fas fa-info-circle me-2"></i><span id="tip3Title">المزج بين المنتجات</span></h6>
+                            <p class="mb-0" id="tip3Desc">دمج منتجات بأحجام مختلفة يمكن أن يساعد في ملء الفراغات بشكل أفضل.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- شاشة التحميل -->
+        <div class="loading" id="loadingIndicator">
+            <div class="spinner"></div>
+            <p id="loadingText">جاري حساب أفضل طريقة للتحميل...</p>
+        </div>
+        
+        <!-- نتائج الحساب -->
+        <div class="card mt-4" id="resultsCard" style="display: none;">
+            <div class="card-header">
+                <i class="fas fa-chart-bar me-2"></i><span id="resultsTitle">نتائج حساب الحمولة</span>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="results-table">
+                        <thead>
+                            <tr>
+                                <th id="thContainerType">نوع الحاوية</th>
+                                <th id="thProductCount">عدد المنتجات</th>
+                                <th id="thUsedSpace">المساحة المستخدمة</th>
+                                <th id="thRemainingSpace">المساحة المتبقية</th>
+                                <th id="thUtilizationRate">نسبة الاستخدام</th>
+                                <th id="thDistribution">التوزيع المقترح</th>
+                                <th id="thViewDiagram">عرض المخطط</th>
+                            </tr>
+                        </thead>
+                        <tbody id="resultsBody">
+                            <!-- سيتم ملء النتائج هنا -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- مخططات التوزيع -->
+                <div class="visualization-container mt-4" id="visualizationContainer" style="display: none;">
+                    <h4 class="mb-3" id="visualizationTitle">مخططات توزيع المنتجات داخل الحاويات</h4>
+                    
+                    <div class="visualization-tabs" id="visualizationTabs">
+                        <!-- سيتم إضافة علامات التبويب هنا -->
+                    </div>
+                    
+                    <div class="view-controls">
+                        <button class="view-btn active" data-view="top" id="viewTop">منظر علوي</button>
+                        <button class="view-btn" data-view="front" id="viewFront">منظر أمامي</button>
+                        <button class="view-btn" data-view="side" id="viewSide">منظر جانبي</button>
+                    </div>
+                    
+                    <div id="visualizationContent">
+                        <!-- سيتم إضافة محتوى المخططات هنا -->
+                    </div>
+                </div>
+                
+                <div class="action-buttons">
+                    <button class="btn btn-primary" id="exportExcelBtn">
+                        <i class="fas fa-file-excel me-2"></i><span id="exportExcelText">تصدير إلى Excel</span>
+                    </button>
+                    <button class="btn btn-danger" id="exportPdfBtn">
+                        <i class="fas fa-file-pdf me-2"></i><span id="exportPdfText">تصدير إلى PDF</span>
+                    </button>
+                    <button class="btn btn-secondary" id="printBtn">
+                        <i class="fas fa-print me-2"></i><span id="printText">طباعة النتائج</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- زر العائمة للرجوع للأعلى -->
+    <div class="floating-action">
+        <button class="floating-btn" id="scrollToTop">
+            <i class="fas fa-arrow-up"></i>
+        </button>
+    </div>
+
+    <!-- مكتبات JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    
+    <script>
+        // بيانات التطبيق
+        const appData = {
+            products: [],
+            containers: {
+                '20ft': { 
+                    length: 5.89, 
+                    width: 2.35, 
+                    height: 2.39, 
+                    name: 'حاوية 20 قدم',
+                    doorSpace: 0.15 // مساحة الباب
+                },
+                '40ft': { 
+                    length: 12.03, 
+                    width: 2.35, 
+                    height: 2.39, 
+                    name: 'حاوية 40 قدم',
+                    doorSpace: 0.15
+                },
+                '40ftHigh': { 
+                    length: 12.03, 
+                    width: 2.35, 
+                    height: 2.69, 
+                    name: 'حاوية 40 قدم عالية',
+                    doorSpace: 0.15
+                }
+            },
+            selectedContainers: [],
+            loadResults: {},
+            currentView: 'top',
+            currentUnit: 'cm',
+            usePallets: false,
+            safetySpace: true,
+            doorSpace: true,
+            language: 'ar'
+        };
+
+        // نصوص التطبيق بلغتين
+        const appTexts = {
+            ar: {
+                mainTitle: "تطبيق حساب حمولة الحاويات",
+                mainSubtitle: "احسب أفضل طريقة لتحميل منتجاتك في الحاويات بسهولة",
+                settingsTitle: "إعدادات التحميل",
+                palletLabel: "نوع التحميل:",
+                palletNoneLabel: "بدون بالتات خشبية",
+                palletNoneDesc: "المنتجات توضع مباشرة في الحاوية",
+                palletWithLabel: "مع بالتات خشبية",
+                palletWithDesc: "المنتجات توضع على بالتات خشبية قياسية (1.2م × 1م)",
+                safetyLabel: "إعدادات السلامة:",
+                safetySpaceLabel: "مسافات أمان بين المنتجات",
+                doorSpaceLabel: "مراعاة مساحة باب الحاوية",
+                uploadTitle: "رفع ملف البيانات",
+                uploadDragTitle: "اسحب ملف Excel وأفلته هنا",
+                uploadClickDesc: "أو انقر لاختيار الملف",
+                uploadButtonText: "اختر ملف Excel",
+                uploadRequirements: "يجب أن يحتوي الملف على الأعمدة التالية: اسم الصنف، الطول، العرض، الارتفاع",
+                manualEntryTitle: "أو أدخل البيانات يدويًا:",
+                unitLabel: "وحدة القياس:",
+                lengthLabel: "الطول:",
+                widthLabel: "العرض:",
+                heightLabel: "الارتفاع:",
+                addButtonText: "إضافة",
+                noProductsText: "لم يتم إضافة منتجات بعد",
+                containerTitle: "اختيار نوع الحاوية",
+                calculateButtonText: "حساب الحمولة",
+                tipsTitle: "نصائح لتحسين الحمولة",
+                tip1Title: "ترتيب المنتجات",
+                tip1Desc: "رتب المنتجات بحيث توضع الصناديق الكبيرة أولاً ثم الأصغر لتقليل الفراغات.",
+                tip2Title: "استخدام الارتفاع",
+                tip2Desc: "استفد من الارتفاع الكامل للحاوية بترتيب المنتجات بشكل رأسي عندما يكون ذلك آمناً.",
+                tip3Title: "المزج بين المنتجات",
+                tip3Desc: "دمج منتجات بأحجام مختلفة يمكن أن يساعد في ملء الفراغات بشكل أفضل.",
+                loadingText: "جاري حساب أفضل طريقة للتحميل...",
+                resultsTitle: "نتائج حساب الحمولة",
+                thContainerType: "نوع الحاوية",
+                thProductCount: "عدد المنتجات",
+                thUsedSpace: "المساحة المستخدمة",
+                thRemainingSpace: "المساحة المتبقية",
+                thUtilizationRate: "نسبة الاستخدام",
+                thDistribution: "التوزيع المقترح",
+                thViewDiagram: "عرض المخطط",
+                visualizationTitle: "مخططات توزيع المنتجات داخل الحاويات",
+                viewTop: "منظر علوي",
+                viewFront: "منظر أمامي",
+                viewSide: "منظر جانبي",
+                exportExcelText: "تصدير إلى Excel",
+                exportPdfText: "تصدير إلى PDF",
+                printText: "طباعة النتائج",
+                noFileError: "يرجى اختيار ملف أولاً",
+                fileReadError: "حدث خطأ في قراءة الملف: ",
+                invalidProductError: "يرجى إدخال بيانات المنتج بشكل صحيح",
+                noProductsError: "يرجى إضافة منتجات أولاً",
+                noContainerError: "يرجى اختيار نوع حاوية واحد على الأقل",
+                noDataExportError: "لا توجد بيانات للتصدير",
+                exportError: "حدث خطأ أثناء التصدير: "
+            },
+            en: {
+                mainTitle: "Container Load Calculator",
+                mainSubtitle: "Calculate the best way to load your products into containers easily",
+                settingsTitle: "Loading Settings",
+                palletLabel: "Loading Type:",
+                palletNoneLabel: "Without Wooden Pallets",
+                palletNoneDesc: "Products are placed directly in the container",
+                palletWithLabel: "With Wooden Pallets",
+                palletWithDesc: "Products are placed on standard wooden pallets (1.2m × 1m)",
+                safetyLabel: "Safety Settings:",
+                safetySpaceLabel: "Safety spaces between products",
+                doorSpaceLabel: "Consider container door space",
+                uploadTitle: "Upload Data File",
+                uploadDragTitle: "Drag and drop Excel file here",
+                uploadClickDesc: "Or click to choose file",
+                uploadButtonText: "Choose Excel File",
+                uploadRequirements: "The file must contain the following columns: Product Name, Length, Width, Height",
+                manualEntryTitle: "Or enter data manually:",
+                unitLabel: "Measurement Unit:",
+                lengthLabel: "Length:",
+                widthLabel: "Width:",
+                heightLabel: "Height:",
+                addButtonText: "Add",
+                noProductsText: "No products added yet",
+                containerTitle: "Select Container Type",
+                calculateButtonText: "Calculate Load",
+                tipsTitle: "Tips to Improve Loading",
+                tip1Title: "Product Arrangement",
+                tip1Desc: "Arrange products so that larger boxes are placed first, then smaller ones to reduce gaps.",
+                tip2Title: "Using Height",
+                tip2Desc: "Make use of the full height of the container by arranging products vertically when safe to do so.",
+                tip3Title: "Mixing Products",
+                tip3Desc: "Mixing products of different sizes can help fill gaps better.",
+                loadingText: "Calculating the best loading method...",
+                resultsTitle: "Load Calculation Results",
+                thContainerType: "Container Type",
+                thProductCount: "Product Count",
+                thUsedSpace: "Used Space",
+                thRemainingSpace: "Remaining Space",
+                thUtilizationRate: "Utilization Rate",
+                thDistribution: "Suggested Distribution",
+                thViewDiagram: "View Diagram",
+                visualizationTitle: "Product Distribution Diagrams in Containers",
+                viewTop: "Top View",
+                viewFront: "Front View",
+                viewSide: "Side View",
+                exportExcelText: "Export to Excel",
+                exportPdfText: "Export to PDF",
+                printText: "Print Results",
+                noFileError: "Please select a file first",
+                fileReadError: "Error reading file: ",
+                invalidProductError: "Please enter product data correctly",
+                noProductsError: "Please add products first",
+                noContainerError: "Please select at least one container type",
+                noDataExportError: "No data to export",
+                exportError: "Error during export: "
+            }
+        };
+
+        // ألوان للمنتجات المختلفة
+        const productColors = [
+            '#3498db', '#e74c3c', '#2ecc71', '#f39c12', '#9b59b6', 
+            '#1abc9c', '#d35400', '#c0392b', '#16a085', '#8e44ad',
+            '#27ae60', '#2980b9', '#8e44ad', '#2c3e50', '#f1c40f',
+            '#e67e22', '#34495e', '#7f8c8d', '#95a5a6', '#bdc3c7'
+        ];
+
+        // تهيئة التطبيق
+        document.addEventListener('DOMContentLoaded', function() {
+            // إعداد عناصر التحكم
+            initializeApp();
+            
+            // إعداد أحداث الواجهة
+            setupEventListeners();
+        });
+        
+        // وظيفة تهيئة التطبيق
+        function initializeApp() {
+            // تعيين النصوص الأولية باللغة العربية
+            updateLanguage('ar');
+            
+            // إعداد خيارات البالتات
+            document.querySelectorAll('.pallet-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    document.querySelectorAll('.pallet-option').forEach(opt => opt.classList.remove('selected'));
+                    this.classList.add('selected');
+                    const radio = this.querySelector('input[type="radio"]');
+                    radio.checked = true;
+                    appData.usePallets = radio.id === 'palletWith';
+                });
+            });
+        }
+        
+        // وظيفة تحديث اللغة
+        function updateLanguage(lang) {
+            appData.language = lang;
+            const texts = appTexts[lang];
+            
+            // تحديث اتجاه الصفحة
+            document.body.dir = lang === 'ar' ? 'rtl' : 'ltr';
+            document.body.style.fontFamily = lang === 'ar' ? "'Cairo', sans-serif" : "'Poppins', sans-serif";
+            
+            // تحديث جميع النصوص
+            for (const [key, value] of Object.entries(texts)) {
+                const element = document.getElementById(key);
+                if (element) {
+                    element.textContent = value;
+                }
+            }
+            
+            // تحديث العناصر الأخرى
+            document.getElementById('productName').placeholder = lang === 'ar' ? 'اسم الصنف' : 'Product Name';
+            document.getElementById('productLength').placeholder = lang === 'ar' ? 'الطول' : 'Length';
+            document.getElementById('productWidth').placeholder = lang === 'ar' ? 'العرض' : 'Width';
+            document.getElementById('productHeight').placeholder = lang === 'ar' ? 'الارتفاع' : 'Height';
+            
+            // تحديث أزرار اللغة
+            if (lang === 'ar') {
+                document.getElementById('langAr').classList.add('active');
+                document.getElementById('langEn').classList.remove('active');
+            } else {
+                document.getElementById('langEn').classList.add('active');
+                document.getElementById('langAr').classList.remove('active');
+            }
+        }
+        
+        // وظيفة إعداد الأحداث
+        function setupEventListeners() {
+            const fileInput = document.getElementById('fileInput');
+            const fileUploadArea = document.getElementById('fileUploadArea');
+            const unitSelector = document.getElementById('unitSelector');
+            const addProductBtn = document.getElementById('addProductBtn');
+            const calculateBtn = document.getElementById('calculateBtn');
+            const exportExcelBtn = document.getElementById('exportExcelBtn');
+            const exportPdfBtn = document.getElementById('exportPdfBtn');
+            const printBtn = document.getElementById('printBtn');
+            const scrollToTopBtn = document.getElementById('scrollToTop');
+            const langArBtn = document.getElementById('langAr');
+            const langEnBtn = document.getElementById('langEn');
+            const safetySpaceCheck = document.getElementById('safetySpace');
+            const doorSpaceCheck = document.getElementById('doorSpace');
+            
+            // إعداد أحداث السحب والإفلات
+            setupDragAndDrop(fileUploadArea, fileInput);
+            
+            // إعداد حدث تغيير الملف
+            fileInput.addEventListener('change', handleFileUpload);
+            
+            // إعداد حدث تغيير وحدة القياس
+            unitSelector.addEventListener('change', function() {
+                appData.currentUnit = this.value;
+            });
+            
+            // إعداد حدث إضافة منتج يدوي
+            addProductBtn.addEventListener('click', addProductManually);
+            
+            // إعداد حدث اختيار الحاويات
+            document.querySelectorAll('.container-type input[type="checkbox"]').forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    const containerType = this.value;
+                    const containerElement = this.closest('.container-type');
+                    
+                    if (this.checked) {
+                        containerElement.classList.add('selected');
+                        if (!appData.selectedContainers.includes(containerType)) {
+                            appData.selectedContainers.push(containerType);
+                        }
+                    } else {
+                        containerElement.classList.remove('selected');
+                        appData.selectedContainers = appData.selectedContainers.filter(type => type !== containerType);
+                    }
+                });
+            });
+            
+            // إعداد حدث حساب الحمولة
+            calculateBtn.addEventListener('click', calculateLoad);
+            
+            // إعداد أحداث التصدير والطباعة
+            exportExcelBtn.addEventListener('click', exportToExcel);
+            exportPdfBtn.addEventListener('click', exportToPdf);
+            printBtn.addEventListener('click', printResults);
+            
+            // إعداد أحداث تغيير المنظر
+            document.querySelectorAll('.view-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    appData.currentView = this.getAttribute('data-view');
+                    updateVisualizations();
+                });
+            });
+            
+            // إعداد حدث الزر العائم
+            scrollToTopBtn.addEventListener('click', function() {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+            
+            // إعداد أحداث تغيير اللغة
+            langArBtn.addEventListener('click', function() {
+                updateLanguage('ar');
+            });
+            
+            langEnBtn.addEventListener('click', function() {
+                updateLanguage('en');
+            });
+            
+            // إعداد أحداث إعدادات السلامة
+            safetySpaceCheck.addEventListener('change', function() {
+                appData.safetySpace = this.checked;
+            });
+            
+            doorSpaceCheck.addEventListener('change', function() {
+                appData.doorSpace = this.checked;
+            });
+        }
+        
+        // وظيفة إعداد السحب والإفلات
+        function setupDragAndDrop(dropArea, fileInput) {
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropArea.addEventListener(eventName, preventDefaults, false);
+            });
+            
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropArea.addEventListener(eventName, highlight, false);
+            });
+            
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropArea.addEventListener(eventName, unhighlight, false);
+            });
+            
+            function highlight() {
+                dropArea.classList.add('dragover');
+            }
+            
+            function unhighlight() {
+                dropArea.classList.remove('dragover');
+            }
+            
+            dropArea.addEventListener('drop', handleDrop, false);
+            
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                fileInput.files = files;
+                handleFileUpload();
+            }
+        }
+        
+        // وظيفة معالجة رفع الملف
+        function handleFileUpload() {
+            const file = fileInput.files[0];
+            if (!file) {
+                alert(getText('noFileError'));
+                return;
+            }
+            
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    const jsonData = XLSX.utils.sheet_to_json(worksheet);
+                    
+                    // مسح المنتجات الحالية
+                    appData.products = [];
+                    
+                    // معالجة البيانات
+                    jsonData.forEach(row => {
+                        const productName = row['اسم الصنف'] || row['Product Name'] || row['الصنف'] || 
+                                          row['Item Name'] || row['product'] || 'منتج بدون اسم';
+                        let length = parseFloat(row['الطول'] || row['Length'] || row['طول'] || row['length'] || 0);
+                        let width = parseFloat(row['العرض'] || row['Width'] || row['عرض'] || row['width'] || 0);
+                        let height = parseFloat(row['الارتفاع'] || row['Height'] || row['ارتفاع'] || row['height'] || 0);
+                        
+                        // إذا كانت القيم بالسنتيمتر، نحولها إلى أمتار
+                        if (appData.currentUnit === 'cm' || length > 10 || width > 10 || height > 10) {
+                            length = length / 100;
+                            width = width / 100;
+                            height = height / 100;
+                        }
+                        
+                        if (length > 0 && width > 0 && height > 0) {
+                            appData.products.push({
+                                name: productName,
+                                length: length,
+                                width: width,
+                                height: height,
+                                volume: length * width * height
+                            });
+                        }
+                    });
+                    
+                    updateProductList();
+                    
+                } catch (error) {
+                    alert(getText('fileReadError') + error.message);
+                }
+            };
+            
+            reader.readAsArrayBuffer(file);
+        }
+        
+        // وظيفة إضافة منتج يدوي
+        function addProductManually() {
+            const name = document.getElementById('productName').value.trim();
+            let length = parseFloat(document.getElementById('productLength').value);
+            let width = parseFloat(document.getElementById('productWidth').value);
+            let height = parseFloat(document.getElementById('productHeight').value);
+            
+            if (!name || isNaN(length) || isNaN(width) || isNaN(height) || length <= 0 || width <= 0 || height <= 0) {
+                alert(getText('invalidProductError'));
+                return;
+            }
+            
+            // تحويل القيم إلى أمتار إذا كانت بالسنتيمتر
+            if (appData.currentUnit === 'cm') {
+                length = length / 100;
+                width = width / 100;
+                height = height / 100;
+            }
+            
+            appData.products.push({
+                name: name,
+                length: length,
+                width: width,
+                height: height,
+                volume: length * width * height
+            });
+            
+            // مسح حقول الإدخال
+            document.getElementById('productName').value = '';
+            document.getElementById('productLength').value = '';
+            document.getElementById('productWidth').value = '';
+            document.getElementById('productHeight').value = '';
+            
+            updateProductList();
+        }
+        
+        // وظيفة تحديث قائمة المنتجات
+        function updateProductList() {
+            const productList = document.getElementById('productList');
+            productList.innerHTML = '';
+            
+            if (appData.products.length === 0) {
+                productList.innerHTML = `<p class="text-muted text-center">${getText('noProductsText')}</p>`;
+                return;
+            }
+            
+            appData.products.forEach((product, index) => {
+                const productItem = document.createElement('div');
+                productItem.className = 'product-item d-flex justify-content-between align-items-center';
+                productItem.innerHTML = `
+                    <div>
+                        <strong>${product.name}</strong>
+                        <small class="text-muted"> (${product.length.toFixed(2)} × ${product.width.toFixed(2)} × ${product.height.toFixed(2)} م)</small>
+                    </div>
+                    <button class="btn btn-sm btn-outline-danger" data-index="${index}">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                `;
+                
+                productItem.querySelector('button').addEventListener('click', function() {
+                    const index = parseInt(this.getAttribute('data-index'));
+                    appData.products.splice(index, 1);
+                    updateProductList();
+                });
+                
+                productList.appendChild(productItem);
+            });
+        }
+        
+        // وظيفة حساب الحمولة
+        function calculateLoad() {
+            if (appData.products.length === 0) {
+                alert(getText('noProductsError'));
+                return;
+            }
+            
+            if (appData.selectedContainers.length === 0) {
+                alert(getText('noContainerError'));
+                return;
+            }
+            
+            // إظهار مؤشر التحميل
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            const resultsCard = document.getElementById('resultsCard');
+            const visualizationContainer = document.getElementById('visualizationContainer');
+            
+            loadingIndicator.style.display = 'block';
+            resultsCard.style.display = 'none';
+            visualizationContainer.style.display = 'none';
+            
+            // محاكاة عملية حساب تستغرق وقتًا
+            setTimeout(() => {
+                // مسح النتائج السابقة
+                const resultsBody = document.getElementById('resultsBody');
+                resultsBody.innerHTML = '';
+                appData.loadResults = {};
+                
+                // حساب النتائج لكل حاوية مختارة
+                appData.selectedContainers.forEach(containerType => {
+                    const container = appData.containers[containerType];
+                    const results = calculateContainerLoad(container, appData.products);
+                    
+                    appData.loadResults[containerType] = results;
+                    
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${container.name}</td>
+                        <td>${results.totalProducts}</td>
+                        <td>${results.usedVolume.toFixed(2)} م³</td>
+                        <td>${results.remainingVolume.toFixed(2)} م³</td>
+                        <td>${results.utilizationRate.toFixed(1)}%</td>
+                        <td>${results.distribution}</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary view-diagram-btn" data-container="${containerType}">
+                                <i class="fas fa-chart-bar me-1"></i>${getText('thViewDiagram')}
+                            </button>
+                        </td>
+                    `;
+                    
+                    resultsBody.appendChild(row);
+                });
+                
+                // إعداد أحداث أزرار عرض المخططات
+                document.querySelectorAll('.view-diagram-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const containerType = this.getAttribute('data-container');
+                        showVisualization(containerType);
+                    });
+                });
+                
+                // إخفاء مؤشر التحميل وإظهار النتائج
+                loadingIndicator.style.display = 'none';
+                resultsCard.style.display = 'block';
+            }, 1500);
+        }
+        
+        // وظيفة حساب حمولة حاوية معينة
+        function calculateContainerLoad(container, products) {
+            const containerVolume = container.length * container.width * container.height;
+            let totalProducts = 0;
+            let usedVolume = 0;
+            
+            // حساب مساحة البالتات إذا تم اختيارها
+            const palletSpace = appData.usePallets ? 0.1 : 0; // ارتفاع البالت
+            const palletArea = appData.usePallets ? 1.2 * 1.0 : 0; // مساحة البالت
+            
+            // حساب المساحة الفعلية المتاحة مع مراعاة الباب والمسافات الآمنة
+            const effectiveLength = appData.doorSpace ? container.length - container.doorSpace : container.length;
+            const safetyMargin = appData.safetySpace ? 0.05 : 0; // 5 سم مسافة أمان
+            
+            // محاكاة خوارزمية التحميل
+            const productDistribution = [];
+            
+            products.forEach((product, index) => {
+                // حساب الأبعاد الفعالة مع مراعاة المسافات الآمنة
+                const effectiveProductLength = product.length + safetyMargin;
+                const effectiveProductWidth = product.width + safetyMargin;
+                const effectiveProductHeight = product.height + (appData.usePallets ? palletSpace : 0) + safetyMargin;
+                
+                // حساب عدد المنتجات التي يمكن وضعها في الحاوية
+                const maxLength = Math.floor(effectiveLength / effectiveProductLength);
+                const maxWidth = Math.floor(container.width / effectiveProductWidth);
+                const maxHeight = Math.floor(container.height / effectiveProductHeight);
+                
+                const maxProducts = maxLength * maxWidth * maxHeight;
+                totalProducts += maxProducts;
+                usedVolume += maxProducts * product.volume;
+                
+                // تخزين توزيع المنتجات للمخططات
+                productDistribution.push({
+                    name: product.name,
+                    count: maxProducts,
+                    color: productColors[index % productColors.length],
+                    dimensions: {
+                        length: product.length,
+                        width: product.width,
+                        height: product.height
+                    },
+                    positions: generateProductPositions(container, product, maxLength, maxWidth, maxHeight, safetyMargin)
+                });
+            });
+            
+            // إضافة حجم البالتات إذا تم استخدامها
+            if (appData.usePallets) {
+                const palletsCount = Math.ceil(totalProducts / 20); // تقدير عدد البالتات
+                usedVolume += palletsCount * palletArea * palletSpace;
+            }
+            
+            // التأكد من أن الحجم المستخدم لا يتجاوز حجم الحاوية
+            if (usedVolume > containerVolume) {
+                usedVolume = containerVolume;
+                // تعديل عدد المنتجات بناءً على ذلك
+                totalProducts = Math.floor(totalProducts * (containerVolume / usedVolume));
+            }
+            
+            const remainingVolume = containerVolume - usedVolume;
+            const utilizationRate = (usedVolume / containerVolume) * 100;
+            
+            // توزيع مقترح مبسط
+            let distribution = '';
+            if (utilizationRate > 90) {
+                distribution = appData.language === 'ar' ? 'تحميل ممتاز - استفادة كاملة من المساحة' : 'Excellent loading - full space utilization';
+            } else if (utilizationRate > 75) {
+                distribution = appData.language === 'ar' ? 'تحميل جيد - يمكن تحسينه قليلاً' : 'Good loading - can be slightly improved';
+            } else if (utilizationRate > 60) {
+                distribution = appData.language === 'ar' ? 'تحميل مقبول - هناك مجال للتحسين' : 'Acceptable loading - room for improvement';
+            } else {
+                distribution = appData.language === 'ar' ? 'تحميل ضعيف - يوصى بإعادة ترتيب المنتجات' : 'Poor loading - product rearrangement recommended';
+            }
+            
+            return {
+                totalProducts: totalProducts,
+                usedVolume: usedVolume,
+                remainingVolume: remainingVolume,
+                utilizationRate: utilizationRate,
+                distribution: distribution,
+                productDistribution: productDistribution,
+                container: container,
+                usePallets: appData.usePallets,
+                safetyMargin: safetyMargin,
+                effectiveLength: effectiveLength
+            };
+        }
+        
+        // وظيفة إنشاء مواقع المنتجات (محاكاة)
+        function generateProductPositions(container, product, maxLength, maxWidth, maxHeight, safetyMargin) {
+            const positions = [];
+            let z = appData.usePallets ? 0.1 : 0; // بدء من ارتفاع البالت إذا كان مستخدم
+            
+            for (let h = 0; h < maxHeight; h++) {
+                let y = 0;
+                
+                for (let w = 0; w < maxWidth; w++) {
+                    let x = 0;
+                    
+                    for (let l = 0; l < maxLength; l++) {
+                        positions.push({
+                            x: x,
+                            y: y,
+                            z: z,
+                            length: product.length,
+                            width: product.width,
+                            height: product.height
+                        });
+                        
+                        x += product.length + safetyMargin;
+                    }
+                    
+                    y += product.width + safetyMargin;
+                }
+                
+                z += product.height + safetyMargin;
+            }
+            
+            return positions;
+        }
+        
+        // وظيفة عرض المخططات
+        function showVisualization(containerType) {
+            const visualizationContainer = document.getElementById('visualizationContainer');
+            visualizationContainer.style.display = 'block';
+            
+            // تحديث علامات التبويب
+            const visualizationTabs = document.getElementById('visualizationTabs');
+            const visualizationContent = document.getElementById('visualizationContent');
+            
+            visualizationTabs.innerHTML = '';
+            visualizationContent.innerHTML = '';
+            
+            appData.selectedContainers.forEach(type => {
+                const tab = document.createElement('div');
+                tab.className = `visualization-tab ${type === containerType ? 'active' : ''}`;
+                tab.textContent = appData.containers[type].name;
+                tab.setAttribute('data-container', type);
+                
+                tab.addEventListener('click', function() {
+                    document.querySelectorAll('.visualization-tab').forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    showVisualization(this.getAttribute('data-container'));
+                });
+                
+                visualizationTabs.appendChild(tab);
+            });
+            
+            // عرض مخطط الحاوية المحددة
+            updateVisualizations(containerType);
+        }
+        
+        // وظيفة تحديث المخططات
+        function updateVisualizations(containerType = null) {
+            if (!containerType) {
+                const activeTab = document.querySelector('.visualization-tab.active');
+                if (activeTab) {
+                    containerType = activeTab.getAttribute('data-container');
+                } else {
+                    return;
+                }
+            }
+            
+            const results = appData.loadResults[containerType];
+            if (!results) return;
+            
+            const visualizationContent = document.getElementById('visualizationContent');
+            visualizationContent.innerHTML = '';
+            
+            // إضافة مخطط التوزيع
+            const diagramContainer = document.createElement('div');
+            diagramContainer.className = 'container-diagram';
+            visualizationContent.appendChild(diagramContainer);
+            
+            // إضافة إحصائيات
+            const statsBox = document.createElement('div');
+            statsBox.className = 'stats-box';
+            statsBox.innerHTML = `
+                <h5>${appData.language === 'ar' ? 'إحصائيات الحمولة' : 'Load Statistics'}</h5>
+                <p><strong>${appData.language === 'ar' ? 'عدد المنتجات:' : 'Product Count:'}</strong> ${results.totalProducts}</p>
+                <p><strong>${appData.language === 'ar' ? 'المساحة المستخدمة:' : 'Used Space:'}</strong> ${results.usedVolume.toFixed(2)} م³</p>
+                <p><strong>${appData.language === 'ar' ? 'المساحة المتبقية:' : 'Remaining Space:'}</strong> ${results.remainingVolume.toFixed(2)} م³</p>
+                <p><strong>${appData.language === 'ar' ? 'نسبة الاستخدام:' : 'Utilization Rate:'}</strong> ${results.utilizationRate.toFixed(1)}%</p>
+                <p><strong>${appData.language === 'ar' ? 'مسافات الأمان:' : 'Safety Spaces:'}</strong> ${appData.safetySpace ? (appData.language === 'ar' ? 'مفعلة' : 'Enabled') : (appData.language === 'ar' ? 'غير مفعلة' : 'Disabled')}</p>
+                <p><strong>${appData.language === 'ar' ? 'البالتات الخشبية:' : 'Wooden Pallets:'}</strong> ${appData.usePallets ? (appData.language === 'ar' ? 'مستخدمة' : 'Used') : (appData.language === 'ar' ? 'غير مستخدمة' : 'Not Used')}</p>
+            `;
+            visualizationContent.appendChild(statsBox);
+            
+            // إضافة وسيلة الإيضاح
+            const legend = document.createElement('div');
+            legend.className = 'legend';
+            
+            results.productDistribution.forEach(product => {
+                const legendItem = document.createElement('div');
+                legendItem.className = 'legend-item';
+                legendItem.innerHTML = `
+                    <span>${product.name}</span>
+                    <div class="legend-color" style="background-color: ${product.color};"></div>
+                `;
+                legend.appendChild(legendItem);
+            });
+            
+            // إضافة وسيلة إيضاح للمسافات إذا كانت مفعلة
+            if (appData.safetySpace) {
+                const safetyItem = document.createElement('div');
+                safetyItem.className = 'legend-item';
+                safetyItem.innerHTML = `
+                    <span>${appData.language === 'ar' ? 'مسافات أمان' : 'Safety Spaces'}</span>
+                    <div class="legend-color safety-space"></div>
+                `;
+                legend.appendChild(safetyItem);
+            }
+            
+            visualizationContent.appendChild(legend);
+            
+            // رسم المخطط
+            drawContainerDiagram(diagramContainer, results, appData.currentView);
+        }
+        
+        // وظيفة رسم مخطط الحاوية
+        function drawContainerDiagram(containerElement, results, view) {
+            const container = results.container;
+            const scale = calculateScale(container, containerElement, view);
+            
+            // مسح المخطط السابق
+            containerElement.innerHTML = '';
+            
+            // رسم الحاوية
+            const containerBox = document.createElement('div');
+            containerBox.style.position = 'absolute';
+            containerBox.style.border = '2px solid #333';
+            containerBox.style.backgroundColor = 'rgba(200, 200, 200, 0.2)';
+            
+            if (view === 'top') {
+                containerBox.style.width = `${container.length * scale.x}px`;
+                containerBox.style.height = `${container.width * scale.y}px`;
+                containerBox.style.left = '10px';
+                containerBox.style.top = '10px';
+            } else if (view === 'front') {
+                containerBox.style.width = `${container.length * scale.x}px`;
+                containerBox.style.height = `${container.height * scale.y}px`;
+                containerBox.style.left = '10px';
+                containerBox.style.top = '10px';
+            } else if (view === 'side') {
+                containerBox.style.width = `${container.width * scale.x}px`;
+                containerBox.style.height = `${container.height * scale.y}px`;
+                containerBox.style.left = '10px';
+                containerBox.style.top = '10px';
+            }
+            
+            containerElement.appendChild(containerBox);
+            
+            // رسم مساحة الباب إذا كانت مفعلة
+            if (appData.doorSpace && view === 'top') {
+                const doorSpace = document.createElement('div');
+                doorSpace.className = 'container-door';
+                doorSpace.style.width = `${container.doorSpace * scale.x}px`;
+                doorSpace.style.height = `${container.width * scale.y}px`;
+                doorSpace.style.left = `${10 + (container.length - container.doorSpace) * scale.x}px`;
+                doorSpace.style.top = '10px';
+                doorSpace.innerHTML = appData.language === 'ar' ? 'باب' : 'DOOR';
+                containerElement.appendChild(doorSpace);
+            }
+            
+            // رسم المنتجات
+            results.productDistribution.forEach(product => {
+                product.positions.forEach(position => {
+                    const productBox = document.createElement('div');
+                    productBox.className = 'product-box';
+                    productBox.style.backgroundColor = product.color;
+                    productBox.title = `${product.name} (${position.length}×${position.width}×${position.height}م)`;
+                    
+                    if (view === 'top') {
+                        productBox.style.width = `${position.length * scale.x}px`;
+                        productBox.style.height = `${position.width * scale.y}px`;
+                        productBox.style.left = `${10 + position.x * scale.x}px`;
+                        productBox.style.top = `${10 + position.y * scale.y}px`;
+                        productBox.innerHTML = product.name.substring(0, 3);
+                    } else if (view === 'front') {
+                        productBox.style.width = `${position.length * scale.x}px`;
+                        productBox.style.height = `${position.height * scale.y}px`;
+                        productBox.style.left = `${10 + position.x * scale.x}px`;
+                        productBox.style.top = `${10 + (container.height - position.z - position.height) * scale.y}px`;
+                    } else if (view === 'side') {
+                        productBox.style.width = `${position.width * scale.x}px`;
+                        productBox.style.height = `${position.height * scale.y}px`;
+                        productBox.style.left = `${10 + position.y * scale.x}px`;
+                        productBox.style.top = `${10 + (container.height - position.z - position.height) * scale.y}px`;
+                    }
+                    
+                    containerElement.appendChild(productBox);
+                });
+            });
+            
+            // رسم مسافات الأمان إذا كانت مفعلة
+            if (appData.safetySpace) {
+                drawSafetySpaces(containerElement, results, view, scale);
+            }
+        }
+        
+        // وظيفة رسم مسافات الأمان
+        function drawSafetySpaces(containerElement, results, view, scale) {
+            // هذه وظيفة مبسطة لرسم المسافات الآمنة
+            // في التطبيق الحقيقي، سيتم حساب المسافات بدقة أكبر
+            
+            if (view === 'top' && results.productDistribution.length > 0) {
+                const safetyMargin = results.safetyMargin;
+                const firstProduct = results.productDistribution[0];
+                
+                if (firstProduct.positions.length > 0) {
+                    const firstPosition = firstProduct.positions[0];
+                    
+                    // رسم مسافة أمان رأسية
+                    const verticalSpace = document.createElement('div');
+                    verticalSpace.className = 'safety-space';
+                    verticalSpace.style.position = 'absolute';
+                    verticalSpace.style.width = `${firstPosition.length * scale.x}px`;
+                    verticalSpace.style.height = `${safetyMargin * scale.y}px`;
+                    verticalSpace.style.left = `${10 + firstPosition.x * scale.x}px`;
+                    verticalSpace.style.top = `${10 + (firstPosition.y + firstPosition.width) * scale.y}px`;
+                    containerElement.appendChild(verticalSpace);
+                    
+                    // رسم مسافة أمان أفقية
+                    const horizontalSpace = document.createElement('div');
+                    horizontalSpace.className = 'safety-space';
+                    horizontalSpace.style.position = 'absolute';
+                    horizontalSpace.style.width = `${safetyMargin * scale.x}px`;
+                    horizontalSpace.style.height = `${firstPosition.width * scale.y}px`;
+                    horizontalSpace.style.left = `${10 + (firstPosition.x + firstPosition.length) * scale.x}px`;
+                    horizontalSpace.style.top = `${10 + firstPosition.y * scale.y}px`;
+                    containerElement.appendChild(horizontalSpace);
+                }
+            }
+        }
+        
+        // وظيفة حساب مقياس الرسم
+        function calculateScale(container, containerElement, view) {
+            const padding = 20;
+            const maxWidth = containerElement.offsetWidth - padding * 2;
+            const maxHeight = containerElement.offsetHeight - padding * 2;
+            
+            if (view === 'top') {
+                const scaleX = maxWidth / container.length;
+                const scaleY = maxHeight / container.width;
+                const scale = Math.min(scaleX, scaleY);
+                return { x: scale, y: scale };
+            } else if (view === 'front') {
+                const scaleX = maxWidth / container.length;
+                const scaleY = maxHeight / container.height;
+                const scale = Math.min(scaleX, scaleY);
+                return { x: scale, y: scale };
+            } else if (view === 'side') {
+                const scaleX = maxWidth / container.width;
+                const scaleY = maxHeight / container.height;
+                const scale = Math.min(scaleX, scaleY);
+                return { x: scale, y: scale };
+            }
+            
+            return { x: 1, y: 1 };
+        }
+        
+        // وظيفة الحصول على النص بناءً على اللغة
+        function getText(key) {
+            return appTexts[appData.language][key] || key;
+        }
+        
+        // وظيفة التصدير إلى Excel
+        function exportToExcel() {
+            if (appData.products.length === 0) {
+                alert(getText('noDataExportError'));
+                return;
+            }
+            
+            try {
+                // إنشاء مصنف Excel
+                const wb = XLSX.utils.book_new();
+                
+                // إضافة ورقة للمنتجات
+                const productsData = appData.products.map(p => [p.name, p.length, p.width, p.height, p.volume]);
+                productsData.unshift([getText('thContainerType'), 'الطول (م)', 'العرض (م)', 'الارتفاع (م)', 'الحجم (م³)']);
+                const productsWs = XLSX.utils.aoa_to_sheet(productsData);
+                XLSX.utils.book_append_sheet(wb, productsWs, 'المنتجات');
+                
+                // إضافة ورقة للنتائج
+                const resultsData = [];
+                resultsData.push([getText('thContainerType'), getText('thProductCount'), getText('thUsedSpace') + ' (م³)', getText('thRemainingSpace') + ' (م³)', getText('thUtilizationRate') + ' %', getText('thDistribution')]);
+                
+                appData.selectedContainers.forEach(containerType => {
+                    const container = appData.containers[containerType];
+                    const results = appData.loadResults[containerType] || calculateContainerLoad(container, appData.products);
+                    resultsData.push([
+                        container.name,
+                        results.totalProducts,
+                        `${results.usedVolume.toFixed(2)}`,
+                        `${results.remainingVolume.toFixed(2)}`,
+                        `${results.utilizationRate.toFixed(1)}`,
+                        results.distribution
+                    ]);
+                });
+                
+                const resultsWs = XLSX.utils.aoa_to_sheet(resultsData);
+                XLSX.utils.book_append_sheet(wb, resultsWs, 'نتائج الحمولة');
+                
+                // حفظ الملف
+                XLSX.writeFile(wb, 'نتائج_حمولة_الحاويات.xlsx');
+                
+            } catch (error) {
+                alert(getText('exportError') + error.message);
+            }
+        }
+        
+        // وظيفة التصدير إلى PDF
+        function exportToPdf() {
+            if (appData.products.length === 0) {
+                alert(getText('noDataExportError'));
+                return;
+            }
+            
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                
+                // إضافة عنوان التقرير
+                doc.setFontSize(18);
+                doc.text(getText('resultsTitle'), 105, 15, { align: 'center' });
+                
+                // إضافة تاريخ التقرير
+                doc.setFontSize(12);
+                const today = new Date();
+                doc.text(`${appData.language === 'ar' ? 'تاريخ التقرير:' : 'Report Date:'} ${today.toLocaleDateString('ar-EG')}`, 105, 25, { align: 'center' });
+                
+                // إضافة جدول النتائج
+                let yPosition = 40;
+                
+                doc.setFontSize(14);
+                doc.text(getText('resultsTitle'), 14, yPosition);
+                yPosition += 10;
+                
+                // بيانات الجدول
+                const headers = [[getText('thContainerType'), getText('thProductCount'), getText('thUsedSpace') + ' (م³)', getText('thRemainingSpace') + ' (م³)', getText('thUtilizationRate') + ' %']];
+                const data = [];
+                
+                appData.selectedContainers.forEach(containerType => {
+                    const container = appData.containers[containerType];
+                    const results = appData.loadResults[containerType] || calculateContainerLoad(container, appData.products);
+                    data.push([
+                        container.name,
+                        results.totalProducts.toString(),
+                        `${results.usedVolume.toFixed(2)}`,
+                        `${results.remainingVolume.toFixed(2)}`,
+                        `${results.utilizationRate.toFixed(1)}`
+                    ]);
+                });
+                
+                doc.autoTable({
+                    startY: yPosition,
+                    head: headers,
+                    body: data,
+                    theme: 'grid',
+                    styles: { font: 'tahoma', fontStyle: 'normal', halign: 'center' },
+                    headStyles: { fillColor: [67, 97, 238] }
+                });
+                
+                // حفظ الملف
+                doc.save('نتائج_حمولة_الحاويات.pdf');
+                
+            } catch (error) {
+                alert(getText('exportError') + error.message);
+            }
+        }
+        
+        // وظيفة طباعة النتائج
+        function printResults() {
+            const printContent = document.getElementById('resultsCard').innerHTML;
+            const originalContent = document.body.innerHTML;
+            
+            document.body.innerHTML = `
+                <div class="container mt-4">
+                    <h1 class="text-center mb-4">${getText('resultsTitle')}</h1>
+                    ${printContent}
+                </div>
+            `;
+            
+            window.print();
+            document.body.innerHTML = originalContent;
+            location.reload();
+        }
+    </script>
+</body>
+</html>
